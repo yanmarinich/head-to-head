@@ -36,7 +36,7 @@ Head to Head (H2H) implements a dynamic peer-to-peer betting system where:
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone git@github.com:yanmarinich/head-to-head.git
 cd head-to-head
 ```
 
