@@ -1,6 +1,6 @@
 Here's the updated README with the "Head to Head" branding, which better reflects the competitive nature of the project:
 
-````markdown
+```markdown
 # Head to Head (H2H)
 
 A decentralized peer-to-peer price prediction battle platform on Solana where players go head-to-head betting on price movements. Challenge others or accept challenges by predicting whether a price will go UP or DOWN - winner takes all!
@@ -31,6 +31,7 @@ Head to Head (H2H) implements a dynamic peer-to-peer betting system where:
 - Solana Tool Suite 1.16.0 or higher
 - Anchor Framework 0.28.0 or higher
 - Node.js 16+ and npm
+```
 
 ## Installation
 
@@ -40,12 +41,11 @@ Head to Head (H2H) implements a dynamic peer-to-peer betting system where:
 git clone <repository-url>
 cd head-to-head
 ```
-````
 
 2. Install dependencies:
 
 ```bash
-yarn install
+npm install
 ```
 
 ## Building
@@ -82,7 +82,7 @@ anchor test -- --features "debug-logs"
 
 - `Config`: Game parameters and admin settings
 - `Games`: Active and completed battles
-- `Prices`: Price oracle data
+- `Prices`: Price data
 - `Vault`: Secure token holdings
 
 ### Instructions
@@ -100,37 +100,6 @@ anchor test -- --features "debug-logs"
 - Join timeframe limitations
 - Price movement validations
 
-## Development Setup
-
-1. Start local Solana validator:
-
-```bash
-solana-test-validator
-```
-
-2. Build and deploy:
-
-```bash
-anchor build
-anchor deploy
-```
-
-3. Update program ID:
-
-```bash
-solana address -k target/deploy/head_to_head_keypair.json
-```
-
-Copy the output to `Anchor.toml` and `lib.rs`
-
-## Contributing
-
-1. Fork the repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
-
 ## Security Features
 
 - PDA-based account security
@@ -139,22 +108,6 @@ Copy the output to `Anchor.toml` and `lib.rs`
 - Input validation
 - Secure vault architecture
 
-## License
-
-MIT License
-
 ## Disclaimer
 
-This is an experimental prediction game. Participate responsibly and at your own risk. Price movements can be unpredictable.
-
-```
-
-The "Head to Head" branding better captures the essence of your project - it's about direct competition, making predictions, and winning against opponents. The name suggests:
-- Direct competition (1v1)
-- Clear winners and losers
-- Strategic decision making
-- Real-time price action
-- Betting elements
-
-Would you like me to adjust any part of the README to better match your vision for the project?
-```
+This project is only for demostration purposes.
