@@ -1,5 +1,3 @@
-Here's the updated README with the "Head to Head" branding, which better reflects the competitive nature of the project:
-
 ```markdown
 # Head to Head (H2H)
 
@@ -29,7 +27,7 @@ Head to Head (H2H) implements a dynamic peer-to-peer betting system where:
 
 - Rust 1.70.0 or higher
 - Solana Tool Suite 1.16.0 or higher
-- Anchor Framework 0.28.0 or higher
+- Anchor Framework 0.30.1 or higher
 - Node.js 16+ and npm
 ```
 
@@ -68,12 +66,6 @@ Run Rust tests:
 
 ```bash
 cargo test
-```
-
-Run tests with logs:
-
-```bash
-anchor test -- --features "debug-logs"
 ```
 
 ## Program Architecture

@@ -834,6 +834,12 @@ describe("Head to Head Game", () => {
 
   it("allows winning host to successfully claim", async () => {
     await credit(playerATokenAccount, D_BET_SIZE);
+    await credit(playerBTokenAccount, D_BET_SIZE);
+
+    const initialOpponentBalance = await connection.getTokenAccountBalance(
+      playerBTokenAccount
+    );
+
     const initialHostBalance = await connection.getTokenAccountBalance(
       playerATokenAccount
     );
@@ -871,7 +877,6 @@ describe("Head to Head Game", () => {
     );
 
     // Player B joins predicting DOWN
-    await credit(playerBTokenAccount, D_BET_SIZE);
     await program.methods
       .joinGame(gameIndex)
       .accounts({
@@ -901,8 +906,6 @@ describe("Head to Head Game", () => {
       .signers([SIGNER])
       .rpc({ commitment: "confirmed" });
 
-    const newPrices = await program.account.prices.fetch(pricesPda);
-
     // Host claims winnings
     await program.methods
       .claimWinnings(gameIndex)
@@ -917,20 +920,128 @@ describe("Head to Head Game", () => {
     const finalHostBalance = await connection.getTokenAccountBalance(
       playerATokenAccount
     );
-    const finalVaultBalance = await connection.getTokenAccountBalance(vaultPda);
+
+    const finalOpponentBalance = await connection.getTokenAccountBalance(
+      playerBTokenAccount
+    );
 
     expect(finalHostBalance.value.uiAmount).to.equal(
       initialHostBalance.value.uiAmount + BET_SIZE
     );
 
-    expect(finalVaultBalance.value.uiAmount).to.equal(
-      initialVaultBalance.value.uiAmount - BET_SIZE * 2
+    expect(finalOpponentBalance.value.uiAmount).to.equal(
+      initialOpponentBalance.value.uiAmount - BET_SIZE
     );
 
-    // Verify game is closed
+    // // Verify game is closed
     const finalGamesAccount = await program.account.games.fetch(gamesPda);
     const finalGame = finalGamesAccount.games[gameIndex];
     expect(finalGame.isClosed).to.be.true;
     expect(finalGame.result).to.be.true;
+  });
+
+  it("allows winning opponent to successfully claim", async () => {
+    await credit(playerATokenAccount, D_BET_SIZE);
+    await credit(playerBTokenAccount, D_BET_SIZE);
+    const initialHostBalance = await connection.getTokenAccountBalance(
+      playerATokenAccount
+    );
+    const initialOpponentBalance = await connection.getTokenAccountBalance(
+      playerBTokenAccount
+    );
+
+    const initialVaultBalance = await connection.getTokenAccountBalance(
+      vaultPda
+    );
+
+    await program.methods
+      .createGame(true)
+      .accounts({
+        player: mockPlayerAKeypair.publicKey,
+        playerTokenAccount: playerATokenAccount,
+      })
+      .signers([mockPlayerAKeypair])
+      .rpc({ commitment: "confirmed" });
+
+    const gamesAccount = await program.account.games.fetch(gamesPda);
+    const gameIndex = gamesAccount.games.length - 1;
+
+    const hostBalanceAfterCreating = await connection.getTokenAccountBalance(
+      playerATokenAccount
+    );
+
+    expect(hostBalanceAfterCreating.value.uiAmount).to.equal(
+      initialHostBalance.value.uiAmount - BET_SIZE
+    );
+
+    const vaultBalanceAfterCreating = await connection.getTokenAccountBalance(
+      vaultPda
+    );
+
+    expect(vaultBalanceAfterCreating.value.uiAmount).to.equal(
+      initialVaultBalance.value.uiAmount + BET_SIZE
+    );
+
+    // Player B joins predicting DOWN
+    await program.methods
+      .joinGame(gameIndex)
+      .accounts({
+        player: mockPlayerBKeypair.publicKey,
+        playerTokenAccount: playerBTokenAccount,
+      })
+      .signers([mockPlayerBKeypair])
+      .rpc({ commitment: "confirmed" });
+
+    // Check vault balance after opponent joins
+    const vaultBalanceAfterJoin = await connection.getTokenAccountBalance(
+      vaultPda
+    );
+
+    expect(vaultBalanceAfterJoin.value.uiAmount).to.equal(
+      vaultBalanceAfterCreating.value.uiAmount + BET_SIZE
+    );
+
+    // Set price to move 5% up making host (Player A) the winner
+    const priceAccount = await program.account.prices.fetch(pricesPda);
+    const game = gamesAccount.games[gameIndex];
+    const gamePrice = priceAccount.prices[game.priceIndex];
+
+    const newPrice = gamePrice.mul(new BN(94)).div(new BN(100)); // 5% increase
+    await program.methods
+      .addPrice(newPrice)
+      .signers([SIGNER])
+      .rpc({ commitment: "confirmed" });
+
+    // Host claims winnings
+    await program.methods
+      .claimWinnings(gameIndex)
+      .accounts({
+        player: mockPlayerBKeypair.publicKey,
+        playerTokenAccount: playerBTokenAccount,
+      })
+      .signers([mockPlayerBKeypair])
+      .rpc({ commitment: "confirmed" });
+
+    // Check final balances
+    const finalHostBalance = await connection.getTokenAccountBalance(
+      playerATokenAccount
+    );
+
+    const finalOpponentBalance = await connection.getTokenAccountBalance(
+      playerBTokenAccount
+    );
+
+    expect(finalHostBalance.value.uiAmount).to.equal(
+      initialHostBalance.value.uiAmount - BET_SIZE
+    );
+    expect(finalOpponentBalance.value.uiAmount).to.equal(
+      initialOpponentBalance.value.uiAmount + BET_SIZE
+    );
+
+    // // Verify game is closed
+    const finalGamesAccount = await program.account.games.fetch(gamesPda);
+    const finalGame = finalGamesAccount.games[gameIndex];
+    expect(finalGame.isClosed).to.be.true;
+    expect(finalGame.result).to.be.false;
   });
 });
